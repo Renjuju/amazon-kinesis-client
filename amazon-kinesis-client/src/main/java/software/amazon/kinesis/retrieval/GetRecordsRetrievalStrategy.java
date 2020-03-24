@@ -15,7 +15,7 @@
 package software.amazon.kinesis.retrieval;
 
 import software.amazon.awssdk.services.kinesis.model.GetRecordsResponse;
-import software.amazon.kinesis.retrieval.polling.KinesisDataFetcher;
+import software.amazon.kinesis.retrieval.polling.DataFetcher;
 
 /**
  * Represents a strategy to retrieve records from Kinesis. Allows for variations on how records are retrieved from
@@ -25,11 +25,9 @@ public interface GetRecordsRetrievalStrategy {
     /**
      * Gets a set of records from Kinesis.
      *
-     * @param maxRecords
-     *            passed to Kinesis, and can be used to restrict the number of records returned from Kinesis.
+     * @param maxRecords passed to Kinesis, and can be used to restrict the number of records returned from Kinesis.
      * @return the resulting records.
-     * @throws IllegalStateException
-     *             if the strategy has been shutdown.
+     * @throws IllegalStateException if the strategy has been shutdown.
      */
     GetRecordsResponse getRecords(int maxRecords);
 
@@ -41,15 +39,15 @@ public interface GetRecordsRetrievalStrategy {
 
     /**
      * Returns whether this strategy has been shutdown.
-     * 
+     *
      * @return true if the strategy has been shutdown, false otherwise.
      */
     boolean isShutdown();
 
     /**
      * Returns the KinesisDataFetcher used to records from Kinesis.
-     * 
+     *
      * @return KinesisDataFetcher
      */
-    KinesisDataFetcher getDataFetcher();
+    DataFetcher getDataFetcher();
 }

@@ -22,6 +22,7 @@ import software.amazon.kinesis.metrics.MetricsFactory;
  *
  */
 public interface RetrievalFactory {
+
     GetRecordsRetrievalStrategy createGetRecordsRetrievalStrategy(ShardInfo shardInfo, MetricsFactory metricsFactory);
 
     RecordsPublisher createGetRecordsCache(ShardInfo shardInfo, MetricsFactory metricsFactory);

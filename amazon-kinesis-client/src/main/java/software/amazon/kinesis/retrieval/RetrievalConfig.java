@@ -29,11 +29,15 @@ import software.amazon.kinesis.common.StreamConfig;
 import software.amazon.kinesis.common.StreamIdentifier;
 import software.amazon.kinesis.processor.MultiStreamTracker;
 import software.amazon.kinesis.retrieval.fanout.FanOutConfig;
+import software.amazon.kinesis.retrieval.polling.DataFetcher;
 
 /**
  * Used by the KCL to configure the retrieval of records from Kinesis.
  */
-@Getter @Setter @ToString @EqualsAndHashCode
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode
 @Accessors(fluent = true)
 public class RetrievalConfig {
     /**
@@ -90,8 +94,10 @@ public class RetrievalConfig {
 
     private RetrievalFactory retrievalFactory;
 
+    private DataFetcher dataFetcher;
+
     public RetrievalConfig(@NonNull KinesisAsyncClient kinesisAsyncClient, @NonNull String streamName,
-            @NonNull String applicationName) {
+                           @NonNull String applicationName) {
         this.kinesisClient = kinesisAsyncClient;
         this.appStreamTracker = Either
                 .right(new StreamConfig(StreamIdentifier.singleStreamInstance(streamName), initialPositionInStreamExtended));
@@ -99,7 +105,7 @@ public class RetrievalConfig {
     }
 
     public RetrievalConfig(@NonNull KinesisAsyncClient kinesisAsyncClient, @NonNull MultiStreamTracker multiStreamTracker,
-            @NonNull String applicationName) {
+                           @NonNull String applicationName) {
         this.kinesisClient = kinesisAsyncClient;
         this.appStreamTracker = Either.left(multiStreamTracker);
         this.applicationName = applicationName;
@@ -116,17 +122,17 @@ public class RetrievalConfig {
     }
 
     public RetrievalFactory retrievalFactory() {
-
         if (retrievalFactory == null) {
             if (retrievalSpecificConfig == null) {
                 retrievalSpecificConfig = new FanOutConfig(kinesisClient())
                         .applicationName(applicationName());
                 retrievalSpecificConfig = appStreamTracker.map(multiStreamTracker -> retrievalSpecificConfig,
-                        streamConfig -> ((FanOutConfig)retrievalSpecificConfig).streamName(streamConfig.streamIdentifier().streamName()));
+                        streamConfig -> ((FanOutConfig) retrievalSpecificConfig).streamName(streamConfig.streamIdentifier().streamName()));
             }
-            retrievalFactory = retrievalSpecificConfig.retrievalFactory();
+
+            retrievalFactory = dataFetcher != null ? retrievalSpecificConfig.retrievalFactory(dataFetcher) :
+                    retrievalSpecificConfig.retrievalFactory();
         }
         return retrievalFactory;
     }
-
 }

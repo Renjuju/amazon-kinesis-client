@@ -26,6 +26,7 @@ import software.amazon.awssdk.services.kinesis.KinesisAsyncClient;
 import software.amazon.kinesis.leases.exceptions.DependencyException;
 import software.amazon.kinesis.retrieval.RetrievalFactory;
 import software.amazon.kinesis.retrieval.RetrievalSpecificConfig;
+import software.amazon.kinesis.retrieval.polling.DataFetcher;
 
 @Data
 @Accessors(fluent = true)

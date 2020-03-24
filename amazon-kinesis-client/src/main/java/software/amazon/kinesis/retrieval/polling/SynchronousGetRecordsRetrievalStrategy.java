@@ -27,7 +27,7 @@ import software.amazon.kinesis.retrieval.GetRecordsRetrievalStrategy;
 @KinesisClientInternalApi
 public class SynchronousGetRecordsRetrievalStrategy implements GetRecordsRetrievalStrategy {
     @NonNull
-    private final KinesisDataFetcher dataFetcher;
+    private final DataFetcher dataFetcher;
 
     @Override
     public GetRecordsResponse getRecords(final int maxRecords) {
@@ -47,7 +47,7 @@ public class SynchronousGetRecordsRetrievalStrategy implements GetRecordsRetriev
     }
     
     @Override
-    public KinesisDataFetcher getDataFetcher() {
+    public DataFetcher getDataFetcher() {
         return dataFetcher;
     }
 }

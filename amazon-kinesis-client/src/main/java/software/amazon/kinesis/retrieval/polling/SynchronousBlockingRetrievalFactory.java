@@ -15,6 +15,7 @@
 
 package software.amazon.kinesis.retrieval.polling;
 
+import com.fasterxml.jackson.core.format.DataFormatDetector;
 import lombok.Data;
 import lombok.NonNull;
 import software.amazon.awssdk.services.kinesis.KinesisAsyncClient;
@@ -46,33 +47,49 @@ public class SynchronousBlockingRetrievalFactory implements RetrievalFactory {
     // private final int maxListShardsRetryAttempts;
     private final int maxRecords;
     private final Duration kinesisRequestTimeout;
+    private final DataFetcher dataFetcher;
 
-    public SynchronousBlockingRetrievalFactory(String streamName, KinesisAsyncClient kinesisClient, RecordsFetcherFactory recordsFetcherFactory, int maxRecords, Duration kinesisRequestTimeout) {
+    public SynchronousBlockingRetrievalFactory(String streamName,
+                                               KinesisAsyncClient kinesisClient,
+                                               RecordsFetcherFactory recordsFetcherFactory,
+                                               int maxRecords,
+                                               Duration kinesisRequestTimeout,
+                                               DataFetcher dataFetcher) {
         this.streamName = streamName;
         this.kinesisClient = kinesisClient;
         this.recordsFetcherFactory = recordsFetcherFactory;
         this.maxRecords = maxRecords;
         this.kinesisRequestTimeout = kinesisRequestTimeout;
+        this.dataFetcher = dataFetcher;
     }
 
     @Deprecated
-    public SynchronousBlockingRetrievalFactory(String streamName, KinesisAsyncClient kinesisClient, RecordsFetcherFactory recordsFetcherFactory, int maxRecords) {
-        this(streamName, kinesisClient, recordsFetcherFactory, maxRecords, PollingConfig.DEFAULT_REQUEST_TIMEOUT);
+    public SynchronousBlockingRetrievalFactory(String streamName,
+                                               KinesisAsyncClient kinesisClient,
+                                               RecordsFetcherFactory recordsFetcherFactory,
+                                               int maxRecords) {
+        this(streamName, kinesisClient, recordsFetcherFactory, maxRecords, PollingConfig.DEFAULT_REQUEST_TIMEOUT, null);
     }
 
     @Override
     public GetRecordsRetrievalStrategy createGetRecordsRetrievalStrategy(@NonNull final ShardInfo shardInfo,
-            @NonNull final MetricsFactory metricsFactory) {
+                                                                         @NonNull final MetricsFactory metricsFactory) {
         final StreamIdentifier streamIdentifier = shardInfo.streamIdentifierSerOpt().isPresent() ?
                 StreamIdentifier.multiStreamInstance(shardInfo.streamIdentifierSerOpt().get()) :
                 StreamIdentifier.singleStreamInstance(streamName);
-        return new SynchronousGetRecordsRetrievalStrategy(
-                new KinesisDataFetcher(kinesisClient, streamIdentifier, shardInfo.shardId(), maxRecords, metricsFactory, kinesisRequestTimeout));
+
+        DataFetcher dataFetcher = this.dataFetcher == null ? new KinesisDataFetcher(kinesisClient,
+                streamIdentifier,
+                shardInfo.shardId(),
+                maxRecords,
+                metricsFactory,
+                kinesisRequestTimeout) : this.dataFetcher;
+        return new SynchronousGetRecordsRetrievalStrategy(dataFetcher);
     }
 
     @Override
     public RecordsPublisher createGetRecordsCache(@NonNull final ShardInfo shardInfo,
-            @NonNull final MetricsFactory metricsFactory) {
+                                                  @NonNull final MetricsFactory metricsFactory) {
         return recordsFetcherFactory.createRecordsFetcher(createGetRecordsRetrievalStrategy(shardInfo, metricsFactory),
                 shardInfo.shardId(), metricsFactory, maxRecords);
     }
