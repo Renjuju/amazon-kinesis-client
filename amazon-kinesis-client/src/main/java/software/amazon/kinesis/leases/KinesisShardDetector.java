@@ -161,7 +161,7 @@ public class KinesisShardDetector implements ShardDetector {
         String nextToken = null;
 
         do {
-            result = listShards(shardFilter, nextToken);
+            result = listNextShards(shardFilter, nextToken);
 
             if (result == null) {
                 /*
@@ -177,6 +177,11 @@ public class KinesisShardDetector implements ShardDetector {
 
         cachedShardMap(shards);
         return shards;
+    }
+
+    @Override
+    public ListShardsResponse listNextShards(final ShardFilter shardFilter, final String nextToken) {
+        return listShards(shardFilter, nextToken);
     }
 
     private ListShardsResponse listShards(ShardFilter shardFilter, final String nextToken) {

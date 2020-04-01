@@ -14,6 +14,7 @@
  */
 package software.amazon.kinesis.retrieval.polling;
 
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
@@ -79,6 +80,7 @@ public class KinesisDataFetcher implements DataFetcher {
 
     /**
      * Constructs KinesisDataFetcher.
+     *
      * @param kinesisClient
      * @param streamIdentifier
      * @param shardId
@@ -95,7 +97,9 @@ public class KinesisDataFetcher implements DataFetcher {
         this.maxFutureWait = maxFutureWait;
     }
 
-    /** Note: This method has package level access for testing purposes.
+    /**
+     * Note: This method has package level access for testing purposes.
+     *
      * @return nextIterator
      */
     @Getter(AccessLevel.PACKAGE)
@@ -178,7 +182,8 @@ public class KinesisDataFetcher implements DataFetcher {
 
     /**
      * Initializes this KinesisDataFetcher's iterator based on the checkpointed sequence number.
-     * @param initialCheckpoint Current checkpoint sequence number for this shard.
+     *
+     * @param initialCheckpoint       Current checkpoint sequence number for this shard.
      * @param initialPositionInStream The initialPositionInStream.
      */
     @Override
@@ -200,7 +205,7 @@ public class KinesisDataFetcher implements DataFetcher {
     /**
      * Advances this KinesisDataFetcher's internal iterator to be at the passed-in sequence number.
      *
-     * @param sequenceNumber advance the iterator to the record at this sequence number.
+     * @param sequenceNumber          advance the iterator to the record at this sequence number.
      * @param initialPositionInStream The initialPositionInStream.
      */
     @Override
@@ -225,9 +230,7 @@ public class KinesisDataFetcher implements DataFetcher {
 
         try {
             try {
-                final GetShardIteratorResponse result = FutureUtils
-                        .resolveOrCancelFuture(kinesisClient.getShardIterator(request), maxFutureWait);
-                nextIterator = result.shardIterator();
+                nextIterator = getNextIterator(request);
                 success = true;
             } catch (ExecutionException e) {
                 throw exceptionManager.apply(e.getCause());
@@ -253,6 +256,13 @@ public class KinesisDataFetcher implements DataFetcher {
         this.initialPositionInStream = initialPositionInStream;
     }
 
+    @Override
+    public String getNextIterator(GetShardIteratorRequest request) throws ExecutionException, InterruptedException, TimeoutException {
+        final GetShardIteratorResponse result = FutureUtils
+                .resolveOrCancelFuture(kinesisClient.getShardIterator(request), maxFutureWait);
+        return result.shardIterator();
+    }
+
     /**
      * Gets a new iterator from the last known sequence number i.e. the sequence number of the last record from the last
      * records call.
@@ -275,16 +285,14 @@ public class KinesisDataFetcher implements DataFetcher {
 
     private GetRecordsResponse getRecords(@NonNull final String nextIterator) {
         final AWSExceptionManager exceptionManager = createExceptionManager();
-        GetRecordsRequest request = KinesisRequestsBuilder.getRecordsRequestBuilder().shardIterator(nextIterator)
-                .limit(maxRecords).build();
+        GetRecordsRequest request = getRequest(nextIterator);
 
         final MetricsScope metricsScope = MetricsUtil.createMetricsWithOperation(metricsFactory, OPERATION);
         MetricsUtil.addShardId(metricsScope, shardId);
         boolean success = false;
         long startTime = System.currentTimeMillis();
         try {
-            final GetRecordsResponse response = FutureUtils.resolveOrCancelFuture(kinesisClient.getRecords(request),
-                    maxFutureWait);
+            final GetRecordsResponse response = getResponse(request);
             success = true;
             return response;
         } catch (ExecutionException e) {
@@ -300,6 +308,18 @@ public class KinesisDataFetcher implements DataFetcher {
                     success, startTime, MetricsLevel.DETAILED);
             MetricsUtil.endScope(metricsScope);
         }
+    }
+
+    @Override
+    public GetRecordsResponse getResponse(GetRecordsRequest request) throws ExecutionException, InterruptedException, TimeoutException {
+        return FutureUtils.resolveOrCancelFuture(kinesisClient.getRecords(request),
+                maxFutureWait);
+    }
+
+    @Override
+    public GetRecordsRequest getRequest(@NonNull String nextIterator) {
+        return KinesisRequestsBuilder.getRecordsRequestBuilder().shardIterator(nextIterator)
+                .limit(maxRecords).build();
     }
 
     private AWSExceptionManager createExceptionManager() {
