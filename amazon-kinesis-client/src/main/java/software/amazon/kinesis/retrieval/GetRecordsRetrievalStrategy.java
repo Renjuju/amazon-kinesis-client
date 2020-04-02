@@ -15,6 +15,7 @@
 package software.amazon.kinesis.retrieval;
 
 import software.amazon.awssdk.services.kinesis.model.GetRecordsResponse;
+import software.amazon.kinesis.retrieval.polling.DataFetcher;
 import software.amazon.kinesis.retrieval.polling.KinesisDataFetcher;
 
 /**
@@ -47,9 +48,9 @@ public interface GetRecordsRetrievalStrategy {
     boolean isShutdown();
 
     /**
-     * Returns the KinesisDataFetcher used to records from Kinesis.
+     * Returns a DataFetcher used to records from Kinesis.
      * 
-     * @return KinesisDataFetcher
+     * @return DataFetcher
      */
-    KinesisDataFetcher getDataFetcher();
+    DataFetcher getDataFetcher();
 }

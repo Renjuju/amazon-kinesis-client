@@ -47,17 +47,25 @@ public class SynchronousBlockingRetrievalFactory implements RetrievalFactory {
     private final int maxRecords;
     private final Duration kinesisRequestTimeout;
 
-    public SynchronousBlockingRetrievalFactory(String streamName, KinesisAsyncClient kinesisClient, RecordsFetcherFactory recordsFetcherFactory, int maxRecords, Duration kinesisRequestTimeout) {
+    private final DataFetcher dataFetcher;
+
+    public SynchronousBlockingRetrievalFactory(String streamName,
+                                               KinesisAsyncClient kinesisClient,
+                                               RecordsFetcherFactory recordsFetcherFactory,
+                                               int maxRecords,
+                                               Duration kinesisRequestTimeout,
+                                               DataFetcher dataFetcher) {
         this.streamName = streamName;
         this.kinesisClient = kinesisClient;
         this.recordsFetcherFactory = recordsFetcherFactory;
         this.maxRecords = maxRecords;
         this.kinesisRequestTimeout = kinesisRequestTimeout;
+        this.dataFetcher = dataFetcher;
     }
 
     @Deprecated
     public SynchronousBlockingRetrievalFactory(String streamName, KinesisAsyncClient kinesisClient, RecordsFetcherFactory recordsFetcherFactory, int maxRecords) {
-        this(streamName, kinesisClient, recordsFetcherFactory, maxRecords, PollingConfig.DEFAULT_REQUEST_TIMEOUT);
+        this(streamName, kinesisClient, recordsFetcherFactory, maxRecords, PollingConfig.DEFAULT_REQUEST_TIMEOUT, null);
     }
 
     @Override
@@ -66,8 +74,15 @@ public class SynchronousBlockingRetrievalFactory implements RetrievalFactory {
         final StreamIdentifier streamIdentifier = shardInfo.streamIdentifierSerOpt().isPresent() ?
                 StreamIdentifier.multiStreamInstance(shardInfo.streamIdentifierSerOpt().get()) :
                 StreamIdentifier.singleStreamInstance(streamName);
-        return new SynchronousGetRecordsRetrievalStrategy(
-                new KinesisDataFetcher(kinesisClient, streamIdentifier, shardInfo.shardId(), maxRecords, metricsFactory, kinesisRequestTimeout));
+        DataFetcher dataFetcher = this.dataFetcher == null ? new KinesisDataFetcher(kinesisClient,
+                streamIdentifier,
+                shardInfo.shardId(),
+                maxRecords,
+                metricsFactory,
+                kinesisRequestTimeout) : this.dataFetcher;
+
+        return new SynchronousGetRecordsRetrievalStrategy(dataFetcher);
+
     }
 
     @Override

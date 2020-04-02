@@ -29,6 +29,7 @@ import software.amazon.kinesis.common.StreamConfig;
 import software.amazon.kinesis.common.StreamIdentifier;
 import software.amazon.kinesis.processor.MultiStreamTracker;
 import software.amazon.kinesis.retrieval.fanout.FanOutConfig;
+import software.amazon.kinesis.retrieval.polling.DataFetcher;
 
 /**
  * Used by the KCL to configure the retrieval of records from Kinesis.
@@ -51,6 +52,11 @@ public class RetrievalConfig {
 
     @NonNull
     private final String applicationName;
+
+    /**
+    * Custom datafetcher
+    */
+    private DataFetcher dataFetcher;
 
     /**
      * AppStreamTracker either for multi stream tracking or single stream
@@ -117,7 +123,6 @@ public class RetrievalConfig {
     }
 
     public RetrievalFactory retrievalFactory() {
-
         if (retrievalFactory == null) {
             if (retrievalSpecificConfig == null) {
                 retrievalSpecificConfig = new FanOutConfig(kinesisClient())
@@ -127,7 +132,9 @@ public class RetrievalConfig {
             }
             retrievalFactory = retrievalSpecificConfig.retrievalFactory();
         }
+        retrievalFactory = dataFetcher != null ? retrievalSpecificConfig.retrievalFactory(dataFetcher) :
+                retrievalSpecificConfig.retrievalFactory();
+
         return retrievalFactory;
     }
-
 }

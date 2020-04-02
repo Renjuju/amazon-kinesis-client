@@ -15,6 +15,8 @@
 
 package software.amazon.kinesis.retrieval;
 
+import software.amazon.kinesis.retrieval.polling.DataFetcher;
+
 public interface RetrievalSpecificConfig {
     /**
      * Creates and returns a retrieval factory for the specific configuration
@@ -22,4 +24,14 @@ public interface RetrievalSpecificConfig {
      * @return a retrieval factory that can create an appropriate retriever
      */
     RetrievalFactory retrievalFactory();
+
+
+    /**
+     * Creates and returns a retieval factory for the specific configuration based on provided data fetcher
+     *
+     * @return a retrieval factory that can create an appropriate retriever with a given data fetcher
+     */
+    default RetrievalFactory retrievalFactory(DataFetcher dataFetcher) {
+        return null;
+    }
 }

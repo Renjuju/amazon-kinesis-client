@@ -102,9 +102,16 @@ public class PollingConfig implements RetrievalSpecificConfig {
      */
     private Duration kinesisRequestTimeout = DEFAULT_REQUEST_TIMEOUT;
 
+
     @Override
     public RetrievalFactory retrievalFactory() {
         return new SynchronousBlockingRetrievalFactory(streamName(), kinesisClient(), recordsFetcherFactory,
-                maxRecords(), kinesisRequestTimeout);
+                maxRecords(), kinesisRequestTimeout, null);
+    }
+
+    @Override
+    public RetrievalFactory retrievalFactory(DataFetcher dataFetcher) {
+        return new SynchronousBlockingRetrievalFactory(streamName(), kinesisClient(), recordsFetcherFactory,
+                maxRecords(), kinesisRequestTimeout, dataFetcher);
     }
 }

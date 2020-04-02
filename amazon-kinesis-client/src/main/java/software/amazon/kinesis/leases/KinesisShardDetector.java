@@ -232,6 +232,11 @@ public class KinesisShardDetector implements ShardDetector {
         lastCacheUpdateTime = Instant.now();
     }
 
+    @Override
+    public ListShardsResponse listNextShards(final String nextToken) {
+        return listShards(nextToken);
+    }
+
     private boolean shouldRefreshCache() {
         final Duration secondsSinceLastUpdate = Duration.between(lastCacheUpdateTime, Instant.now());
         final String message = String.format("Shard map cache is %d seconds old", secondsSinceLastUpdate.getSeconds());

@@ -56,7 +56,7 @@ import software.amazon.kinesis.retrieval.kpl.ExtendedSequenceNumber;
  */
 @Slf4j
 @KinesisClientInternalApi
-public class KinesisDataFetcher {
+public class KinesisDataFetcher implements DataFetcher {
 
     private static final String METRICS_PREFIX = "KinesisDataFetcher";
     private static final String OPERATION = "ProcessTask";
@@ -113,6 +113,7 @@ public class KinesisDataFetcher {
      *
      * @return list of records of up to maxRecords size
      */
+    @Override
     public DataFetcherResult getRecords() {
         if (!isInitialized) {
             throw new IllegalArgumentException("KinesisDataFetcher.records called before initialization.");
@@ -182,6 +183,7 @@ public class KinesisDataFetcher {
      * @param initialCheckpoint Current checkpoint sequence number for this shard.
      * @param initialPositionInStream The initialPositionInStream.
      */
+    @Override
     public void initialize(final String initialCheckpoint,
                            final InitialPositionInStreamExtended initialPositionInStream) {
         log.info("Initializing shard {} with {}", streamAndShardId, initialCheckpoint);
@@ -189,6 +191,7 @@ public class KinesisDataFetcher {
         isInitialized = true;
     }
 
+    @Override
     public void initialize(final ExtendedSequenceNumber initialCheckpoint,
                            final InitialPositionInStreamExtended initialPositionInStream) {
         log.info("Initializing shard {} with {}", streamAndShardId, initialCheckpoint.sequenceNumber());
@@ -202,6 +205,7 @@ public class KinesisDataFetcher {
      * @param sequenceNumber advance the iterator to the record at this sequence number.
      * @param initialPositionInStream The initialPositionInStream.
      */
+    @Override
     public void advanceIteratorTo(final String sequenceNumber,
                                   final InitialPositionInStreamExtended initialPositionInStream) {
         if (sequenceNumber == null) {
@@ -255,6 +259,7 @@ public class KinesisDataFetcher {
      * Gets a new iterator from the last known sequence number i.e. the sequence number of the last record from the last
      * records call.
      */
+    @Override
     public void restartIterator() {
         if (StringUtils.isEmpty(lastKnownSequenceNumber) || initialPositionInStream == null) {
             throw new IllegalStateException(
@@ -263,24 +268,40 @@ public class KinesisDataFetcher {
         advanceIteratorTo(lastKnownSequenceNumber, initialPositionInStream);
     }
 
+    @Override
     public void resetIterator(String shardIterator, String sequenceNumber, InitialPositionInStreamExtended initialPositionInStream) {
         this.nextIterator = shardIterator;
         this.lastKnownSequenceNumber = sequenceNumber;
         this.initialPositionInStream = initialPositionInStream;
     }
 
+    @Override
+    public GetRecordsResponse getResponse(GetRecordsRequest request) throws ExecutionException, InterruptedException, TimeoutException {
+        return FutureUtils.resolveOrCancelFuture(kinesisClient.getRecords(request),
+                maxFutureWait);
+    }
+
+    @Override
+    public GetRecordsRequest getRequest(String nextIterator)  {
+        return KinesisRequestsBuilder.getRecordsRequestBuilder().shardIterator(nextIterator)
+                .limit(maxRecords).build();
+    }
+
+    @Override
+    public String getNextIterator(GetShardIteratorRequest request) throws ExecutionException, InterruptedException, TimeoutException {
+        return null;
+    }
+
     private GetRecordsResponse getRecords(@NonNull final String nextIterator) {
         final AWSExceptionManager exceptionManager = createExceptionManager();
-        GetRecordsRequest request = KinesisRequestsBuilder.getRecordsRequestBuilder().shardIterator(nextIterator)
-                .limit(maxRecords).build();
+        GetRecordsRequest request = getRequest(nextIterator);
 
         final MetricsScope metricsScope = MetricsUtil.createMetricsWithOperation(metricsFactory, OPERATION);
         MetricsUtil.addShardId(metricsScope, shardId);
         boolean success = false;
         long startTime = System.currentTimeMillis();
         try {
-            final GetRecordsResponse response = FutureUtils.resolveOrCancelFuture(kinesisClient.getRecords(request),
-                    maxFutureWait);
+            final GetRecordsResponse response = getResponse(request);
             success = true;
             return response;
         } catch (ExecutionException e) {
