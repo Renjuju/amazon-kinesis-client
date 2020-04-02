@@ -15,12 +15,16 @@
 
 package software.amazon.kinesis.retrieval;
 
+import java.util.function.Function;
+import org.apache.commons.lang3.tuple.Pair;
+import software.amazon.kinesis.common.StreamIdentifier;
 import software.amazon.kinesis.retrieval.polling.DataFetcher;
+import software.amazon.kinesis.retrieval.polling.KinesisDataFetcher;
 
 public interface RetrievalSpecificConfig {
     /**
      * Creates and returns a retrieval factory for the specific configuration
-     * 
+     *
      * @return a retrieval factory that can create an appropriate retriever
      */
     RetrievalFactory retrievalFactory();
@@ -31,7 +35,7 @@ public interface RetrievalSpecificConfig {
      *
      * @return a retrieval factory that can create an appropriate retriever with a given data fetcher
      */
-    default RetrievalFactory retrievalFactory(DataFetcher dataFetcher) {
+    default RetrievalFactory retrievalFactory(Function<Pair<KinesisDataFetcher, StreamIdentifier>, DataFetcher> dataFetcherProvider) {
         return null;
     }
 }

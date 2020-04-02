@@ -15,12 +15,14 @@
 
 package software.amazon.kinesis.retrieval;
 
+import java.util.function.Function;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+import org.apache.commons.lang3.tuple.Pair;
 import software.amazon.awssdk.services.kinesis.KinesisAsyncClient;
 import software.amazon.awssdk.utils.Either;
 import software.amazon.kinesis.common.InitialPositionInStream;
@@ -30,11 +32,15 @@ import software.amazon.kinesis.common.StreamIdentifier;
 import software.amazon.kinesis.processor.MultiStreamTracker;
 import software.amazon.kinesis.retrieval.fanout.FanOutConfig;
 import software.amazon.kinesis.retrieval.polling.DataFetcher;
+import software.amazon.kinesis.retrieval.polling.KinesisDataFetcher;
 
 /**
  * Used by the KCL to configure the retrieval of records from Kinesis.
  */
-@Getter @Setter @ToString @EqualsAndHashCode
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode
 @Accessors(fluent = true)
 public class RetrievalConfig {
     /**
@@ -54,9 +60,9 @@ public class RetrievalConfig {
     private final String applicationName;
 
     /**
-    * Custom datafetcher
-    */
-    private DataFetcher dataFetcher;
+     * Custom datafetcher
+     */
+    private Function<Pair<KinesisDataFetcher, StreamIdentifier>, DataFetcher> customDataFetcherProvider;
 
     /**
      * AppStreamTracker either for multi stream tracking or single stream
@@ -97,7 +103,7 @@ public class RetrievalConfig {
     private RetrievalFactory retrievalFactory;
 
     public RetrievalConfig(@NonNull KinesisAsyncClient kinesisAsyncClient, @NonNull String streamName,
-            @NonNull String applicationName) {
+                           @NonNull String applicationName) {
         this.kinesisClient = kinesisAsyncClient;
         this.appStreamTracker = Either
                 .right(new StreamConfig(StreamIdentifier.singleStreamInstance(streamName), initialPositionInStreamExtended));
@@ -105,7 +111,7 @@ public class RetrievalConfig {
     }
 
     public RetrievalConfig(@NonNull KinesisAsyncClient kinesisAsyncClient, @NonNull MultiStreamTracker multiStreamTracker,
-            @NonNull String applicationName) {
+                           @NonNull String applicationName) {
         this.kinesisClient = kinesisAsyncClient;
         this.appStreamTracker = Either.left(multiStreamTracker);
         this.applicationName = applicationName;
@@ -128,11 +134,11 @@ public class RetrievalConfig {
                 retrievalSpecificConfig = new FanOutConfig(kinesisClient())
                         .applicationName(applicationName());
                 retrievalSpecificConfig = appStreamTracker.map(multiStreamTracker -> retrievalSpecificConfig,
-                        streamConfig -> ((FanOutConfig)retrievalSpecificConfig).streamName(streamConfig.streamIdentifier().streamName()));
+                        streamConfig -> ((FanOutConfig) retrievalSpecificConfig).streamName(streamConfig.streamIdentifier().streamName()));
             }
             retrievalFactory = retrievalSpecificConfig.retrievalFactory();
         }
-        retrievalFactory = dataFetcher != null ? retrievalSpecificConfig.retrievalFactory(dataFetcher) :
+        retrievalFactory = customDataFetcherProvider != null ? retrievalSpecificConfig.retrievalFactory(customDataFetcherProvider) :
                 retrievalSpecificConfig.retrievalFactory();
 
         return retrievalFactory;

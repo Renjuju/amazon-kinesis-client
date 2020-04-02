@@ -227,9 +227,7 @@ public class KinesisDataFetcher implements DataFetcher {
 
         try {
             try {
-                final GetShardIteratorResponse result = FutureUtils
-                        .resolveOrCancelFuture(kinesisClient.getShardIterator(request), maxFutureWait);
-                nextIterator = result.shardIterator();
+                nextIterator = getNextIterator(request);
                 success = true;
             } catch (ExecutionException e) {
                 throw exceptionManager.apply(e.getCause());
@@ -289,10 +287,13 @@ public class KinesisDataFetcher implements DataFetcher {
 
     @Override
     public String getNextIterator(GetShardIteratorRequest request) throws ExecutionException, InterruptedException, TimeoutException {
-        return null;
+        final GetShardIteratorResponse result = FutureUtils
+                .resolveOrCancelFuture(kinesisClient.getShardIterator(request), maxFutureWait);
+        return result.shardIterator();
     }
 
-    private GetRecordsResponse getRecords(@NonNull final String nextIterator) {
+    @Override
+    public GetRecordsResponse getRecords(@NonNull final String nextIterator) {
         final AWSExceptionManager exceptionManager = createExceptionManager();
         GetRecordsRequest request = getRequest(nextIterator);
 

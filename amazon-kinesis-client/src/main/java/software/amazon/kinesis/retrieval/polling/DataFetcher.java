@@ -36,4 +36,6 @@ public interface DataFetcher {
     GetRecordsRequest getRequest(@NonNull String nextIterator) throws ExecutionException, InterruptedException, TimeoutException;
 
     String getNextIterator(GetShardIteratorRequest request) throws ExecutionException, InterruptedException, TimeoutException;
+
+    GetRecordsResponse getRecords(@NonNull final String nextIterator);
 }

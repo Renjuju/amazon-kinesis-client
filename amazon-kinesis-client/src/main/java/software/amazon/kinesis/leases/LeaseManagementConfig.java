@@ -26,15 +26,18 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
+import java.util.function.Function;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.tuple.Pair;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
 import software.amazon.awssdk.services.dynamodb.model.BillingMode;
 import software.amazon.awssdk.services.kinesis.KinesisAsyncClient;
 import software.amazon.kinesis.common.InitialPositionInStream;
 import software.amazon.kinesis.common.InitialPositionInStreamExtended;
+import software.amazon.kinesis.common.StreamIdentifier;
 import software.amazon.kinesis.leases.dynamodb.DynamoDBLeaseManagementFactory;
 import software.amazon.kinesis.leases.dynamodb.TableCreatorCallback;
 import software.amazon.kinesis.metrics.MetricsFactory;
@@ -144,6 +147,9 @@ public class LeaseManagementConfig {
      * <p>Default value: 10</p>
      */
     private int initialLeaseTableWriteCapacity = 10;
+
+
+    private Function<Pair<StreamIdentifier, KinesisShardDetector>, ShardDetector> customShardDetectorProvider;
 
     /**
      * The size of the thread pool to create for the lease renewer to use.
