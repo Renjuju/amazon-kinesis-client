@@ -53,6 +53,7 @@ import software.amazon.kinesis.common.InitialPositionInStream;
 import software.amazon.kinesis.common.InitialPositionInStreamExtended;
 import software.amazon.kinesis.common.StreamConfig;
 import software.amazon.kinesis.common.StreamIdentifier;
+import software.amazon.kinesis.leases.KinesisShardDetector;
 import software.amazon.kinesis.leases.Lease;
 import software.amazon.kinesis.leases.LeaseCoordinator;
 import software.amazon.kinesis.leases.LeaseManagementConfig;
@@ -263,11 +264,13 @@ public class Scheduler implements Runnable {
         this.listShardsBackoffTimeMillis = this.retrievalConfig.listShardsBackoffTimeInMillis();
         this.maxListShardsRetryAttempts = this.retrievalConfig.maxListShardsRetryAttempts();
         this.shardDetectorProvider = streamConfig -> {
-            if (this.leaseManagementConfig.customShardDetectorProvider() != null) {
+            ShardDetector shardDetector = createOrGetShardSyncTaskManager(streamConfig).shardDetector();
+            if (this.leaseManagementConfig.customShardDetectorProvider() != null &&
+                    shardDetector instanceof KinesisShardDetector) {
                 return this.leaseManagementConfig.customShardDetectorProvider().apply(
-                        Pair.of(streamConfig.streamIdentifier(), createOrGetShardSyncTaskManager(streamConfig).shardDetector()));
+                        Pair.of(streamConfig.streamIdentifier(), (KinesisShardDetector) shardDetector));
             }
-            return createOrGetShardSyncTaskManager(streamConfig).shardDetector();
+            return shardDetector;
         };
         this.ignoreUnexpetedChildShards = this.leaseManagementConfig.ignoreUnexpectedChildShards();
         this.aggregatorUtil = this.lifecycleConfig.aggregatorUtil();

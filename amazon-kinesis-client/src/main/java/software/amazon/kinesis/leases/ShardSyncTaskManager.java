@@ -39,7 +39,7 @@ import software.amazon.kinesis.metrics.MetricsCollectingTaskDecorator;
 @Slf4j
 public class ShardSyncTaskManager {
     @NonNull
-    private final KinesisShardDetector shardDetector;
+    private final ShardDetector shardDetector;
     @NonNull
     private final LeaseRefresher leaseRefresher;
     @NonNull
@@ -69,7 +69,7 @@ public class ShardSyncTaskManager {
      * @param metricsFactory
      */
     @Deprecated
-    public ShardSyncTaskManager(KinesisShardDetector shardDetector, LeaseRefresher leaseRefresher,
+    public ShardSyncTaskManager(ShardDetector shardDetector, LeaseRefresher leaseRefresher,
             InitialPositionInStreamExtended initialPositionInStream, boolean cleanupLeasesUponShardCompletion,
             boolean ignoreUnexpectedChildShards, long shardSyncIdleTimeMillis, ExecutorService executorService,
             MetricsFactory metricsFactory) {
@@ -97,7 +97,7 @@ public class ShardSyncTaskManager {
      * @param hierarchicalShardSyncer
      * @param metricsFactory
      */
-    public ShardSyncTaskManager(KinesisShardDetector shardDetector, LeaseRefresher leaseRefresher,
+    public ShardSyncTaskManager(ShardDetector shardDetector, LeaseRefresher leaseRefresher,
             InitialPositionInStreamExtended initialPositionInStream, boolean cleanupLeasesUponShardCompletion,
             boolean ignoreUnexpectedChildShards, long shardSyncIdleTimeMillis, ExecutorService executorService,
             HierarchicalShardSyncer hierarchicalShardSyncer, MetricsFactory metricsFactory) {
