@@ -148,7 +148,16 @@ public class LeaseManagementConfig {
      */
     private int initialLeaseTableWriteCapacity = 10;
 
-
+    /**
+     * Configurable function to override the existing shardDetector.
+     * This is for all custom shard detector using a KinesisShardDetector,
+     * e.g.
+     * <pre>
+     *    Function<Pair<StreamIdentifier, KinesisShardDetector>, ShardDetector> customShardDetectorProvider =
+     *    pair -> new CustomShardDetector(pair.getLeft(), pair.getRight());
+     *    // pair contains the StreamIdentifer and KinesisShardDetector used by KCL
+     * </pre>
+     */
     private Function<Pair<StreamIdentifier, KinesisShardDetector>, ShardDetector> customShardDetectorProvider;
 
     /**
