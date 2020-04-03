@@ -155,7 +155,7 @@ public class LeaseManagementConfig {
      * <pre>
      *    Function<Pair<StreamIdentifier, KinesisShardDetector>, ShardDetector> customShardDetectorProvider =
      *    pair -> new CustomShardDetector(pair.getLeft(), pair.getRight());
-     *    // pair contains the StreamIdentifer and KinesisShardDetector used by KCL
+     *    // pair contains the StreamIdentifier and KinesisShardDetector used by KCL
      * </pre>
      */
     private Function<Pair<StreamIdentifier, KinesisShardDetector>, ShardDetector> customShardDetectorProvider;

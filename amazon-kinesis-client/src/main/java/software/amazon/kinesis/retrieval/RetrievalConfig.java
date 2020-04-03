@@ -60,7 +60,14 @@ public class RetrievalConfig {
     private final String applicationName;
 
     /**
-     * Custom datafetcher
+     * Configurable function to override the existing DataFetcher.
+     * This is for all custom DataFetchers using a KinesisDataFetcher,
+     * e.g.
+     * <pre>
+     *    Function<Pair<StreamIdentifier, KinesisDataFetcher>, DataFetcher> customShardDetectorProvider =
+     *    pair -> new CustomDataFetcher(pair.getLeft(), pair.getRight());
+     *    // pair contains the StreamIdentifier and KinesisDataFetcher used by KCL
+     * </pre>
      */
     private Function<Pair<KinesisDataFetcher, StreamIdentifier>, DataFetcher> customDataFetcherProvider;
 
