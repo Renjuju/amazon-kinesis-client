@@ -108,7 +108,7 @@ public class PrefetchRecordsPublisher implements RecordsPublisher {
         @VisibleForTesting @Getter
         private final LinkedBlockingQueue<PrefetchRecordsRetrieved> prefetchRecordsQueue;
         private final PrefetchCounters prefetchCounters;
-        private final KinesisDataFetcher dataFetcher;
+        private final DataFetcher dataFetcher;
         private InitialPositionInStreamExtended initialPositionInStreamExtended;
         private String highestSequenceNumber;
 

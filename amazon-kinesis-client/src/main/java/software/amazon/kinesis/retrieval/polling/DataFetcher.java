@@ -7,6 +7,7 @@ import software.amazon.awssdk.services.kinesis.model.GetRecordsRequest;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsResponse;
 import software.amazon.awssdk.services.kinesis.model.GetShardIteratorRequest;
 import software.amazon.kinesis.common.InitialPositionInStreamExtended;
+import software.amazon.kinesis.common.StreamIdentifier;
 import software.amazon.kinesis.retrieval.DataFetcherResult;
 import software.amazon.kinesis.retrieval.kpl.ExtendedSequenceNumber;
 
@@ -38,4 +39,6 @@ public interface DataFetcher {
     String getNextIterator(GetShardIteratorRequest request) throws ExecutionException, InterruptedException, TimeoutException;
 
     GetRecordsResponse getRecords(@NonNull final String nextIterator);
+
+    StreamIdentifier getStreamIdentifier();
 }
