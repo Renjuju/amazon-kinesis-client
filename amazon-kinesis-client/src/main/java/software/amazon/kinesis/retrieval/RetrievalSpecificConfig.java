@@ -16,10 +16,9 @@
 package software.amazon.kinesis.retrieval;
 
 import java.util.function.Function;
-import org.apache.commons.lang3.tuple.Pair;
+import software.amazon.awssdk.utils.Pair;
 import software.amazon.kinesis.common.StreamIdentifier;
 import software.amazon.kinesis.retrieval.polling.DataFetcher;
-import software.amazon.kinesis.retrieval.polling.KinesisDataFetcher;
 
 public interface RetrievalSpecificConfig {
     /**
@@ -31,11 +30,11 @@ public interface RetrievalSpecificConfig {
 
 
     /**
-     * Creates and returns a retieval factory for the specific configuration based on provided data fetcher
+     * Creates and returns a retrieval factory for the specific configuration based on provided data fetcher
      *
      * @return a retrieval factory that can create an appropriate retriever with a given data fetcher
      */
-    default RetrievalFactory retrievalFactory(Function<Pair<KinesisDataFetcher, StreamIdentifier>, DataFetcher> dataFetcherProvider) {
-        return null;
+    default RetrievalFactory retrievalFactory(Function<Pair<StreamIdentifier, String>, DataFetcher> dataFetcherProvider) {
+        throw new UnsupportedOperationException();
     }
 }

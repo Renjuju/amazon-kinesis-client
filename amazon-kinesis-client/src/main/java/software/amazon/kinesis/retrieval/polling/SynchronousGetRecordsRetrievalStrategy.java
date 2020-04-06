@@ -14,6 +14,7 @@
  */
 package software.amazon.kinesis.retrieval.polling;
 
+import java.util.Optional;
 import lombok.Data;
 import lombok.NonNull;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsResponse;
@@ -45,9 +46,14 @@ public class SynchronousGetRecordsRetrievalStrategy implements GetRecordsRetriev
     public boolean isShutdown() {
         return false;
     }
-    
+
     @Override
-    public DataFetcher getDataFetcher() {
+    public Optional<DataFetcher> getDataFetcherOverride() {
+        return Optional.of(dataFetcher);
+    }
+
+    @Override
+    public DataFetcher dataFetcher() {
         return dataFetcher;
     }
 }

@@ -15,34 +15,29 @@
 
 package software.amazon.kinesis.leases;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-
 import java.util.function.Function;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.tuple.Pair;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
 import software.amazon.awssdk.services.dynamodb.model.BillingMode;
 import software.amazon.awssdk.services.kinesis.KinesisAsyncClient;
 import software.amazon.kinesis.common.InitialPositionInStream;
 import software.amazon.kinesis.common.InitialPositionInStreamExtended;
-import software.amazon.kinesis.common.StreamIdentifier;
+import software.amazon.kinesis.common.StreamConfig;
 import software.amazon.kinesis.leases.dynamodb.DynamoDBLeaseManagementFactory;
 import software.amazon.kinesis.leases.dynamodb.TableCreatorCallback;
 import software.amazon.kinesis.metrics.MetricsFactory;
 import software.amazon.kinesis.metrics.NullMetricsFactory;
-import software.amazon.kinesis.processor.MultiStreamTracker;
 
 /**
  * Used by the KCL to configure lease management.
@@ -149,16 +144,9 @@ public class LeaseManagementConfig {
     private int initialLeaseTableWriteCapacity = 10;
 
     /**
-     * Configurable function to override the existing shardDetector.
-     * This is for all custom shard detector using a KinesisShardDetector,
-     * e.g.
-     * <pre>
-     *    Function<Pair<StreamIdentifier, KinesisShardDetector>, ShardDetector> customShardDetectorProvider =
-     *    pair -> new CustomShardDetector(pair.getLeft(), pair.getRight());
-     *    // pair contains the StreamIdentifier and KinesisShardDetector used by KCL
-     * </pre>
+     * Configurable functional interface to override the existing shardDetector.
      */
-    private Function<Pair<StreamIdentifier, KinesisShardDetector>, ShardDetector> customShardDetectorProvider;
+    private Function<StreamConfig, ShardDetector> customShardDetectorProvider;
 
     /**
      * The size of the thread pool to create for the lease renewer to use.
@@ -306,30 +294,31 @@ public class LeaseManagementConfig {
         if (leaseManagementFactory == null) {
             Validate.notEmpty(streamName(), "Stream name is empty");
             leaseManagementFactory = new DynamoDBLeaseManagementFactory(kinesisClient(),
-                        streamName(),
-                        dynamoDBClient(),
-                        tableName(),
-                        workerIdentifier(),
-                        executorService(),
-                        initialPositionInStream(),
-                        failoverTimeMillis(),
-                        epsilonMillis(),
-                        maxLeasesForWorker(),
-                        maxLeasesToStealAtOneTime(),
-                        maxLeaseRenewalThreads(),
-                        cleanupLeasesUponShardCompletion(),
-                        ignoreUnexpectedChildShards(),
-                        shardSyncIntervalMillis(),
-                        consistentReads(),
-                        listShardsBackoffTimeInMillis(),
-                        maxListShardsRetryAttempts(),
-                        maxCacheMissesBeforeReload(),
-                        listShardsCacheAllowedAgeInSeconds(),
-                        cacheMissWarningModulus(),
-                        initialLeaseTableReadCapacity(),
-                        initialLeaseTableWriteCapacity(),
-                        hierarchicalShardSyncer(),
-                        tableCreatorCallback(), dynamoDbRequestTimeout(), billingMode());
+                    streamName(),
+                    dynamoDBClient(),
+                    tableName(),
+                    workerIdentifier(),
+                    executorService(),
+                    initialPositionInStream(),
+                    failoverTimeMillis(),
+                    epsilonMillis(),
+                    maxLeasesForWorker(),
+                    maxLeasesToStealAtOneTime(),
+                    maxLeaseRenewalThreads(),
+                    cleanupLeasesUponShardCompletion(),
+                    ignoreUnexpectedChildShards(),
+                    shardSyncIntervalMillis(),
+                    consistentReads(),
+                    listShardsBackoffTimeInMillis(),
+                    maxListShardsRetryAttempts(),
+                    maxCacheMissesBeforeReload(),
+                    listShardsCacheAllowedAgeInSeconds(),
+                    cacheMissWarningModulus(),
+                    initialLeaseTableReadCapacity(),
+                    initialLeaseTableWriteCapacity(),
+                    hierarchicalShardSyncer(),
+                    tableCreatorCallback(), dynamoDbRequestTimeout(), billingMode(),
+                    customShardDetectorProvider());
         }
         return leaseManagementFactory;
     }
@@ -343,31 +332,32 @@ public class LeaseManagementConfig {
     public LeaseManagementFactory leaseManagementFactory(final LeaseSerializer leaseSerializer, boolean isMultiStreamingMode) {
         if(leaseManagementFactory == null) {
             leaseManagementFactory = new DynamoDBLeaseManagementFactory(kinesisClient(),
-                dynamoDBClient(),
-                tableName(),
-                workerIdentifier(),
-                executorService(),
-                failoverTimeMillis(),
-                epsilonMillis(),
-                maxLeasesForWorker(),
-                maxLeasesToStealAtOneTime(),
-                maxLeaseRenewalThreads(),
-                cleanupLeasesUponShardCompletion(),
-                ignoreUnexpectedChildShards(),
-                shardSyncIntervalMillis(),
-                consistentReads(),
-                listShardsBackoffTimeInMillis(),
-                maxListShardsRetryAttempts(),
-                maxCacheMissesBeforeReload(),
-                listShardsCacheAllowedAgeInSeconds(),
-                cacheMissWarningModulus(),
-                initialLeaseTableReadCapacity(),
-                initialLeaseTableWriteCapacity(),
-                hierarchicalShardSyncer(isMultiStreamingMode),
-                tableCreatorCallback(),
-                dynamoDbRequestTimeout(),
-                billingMode(),
-                leaseSerializer);
+                    dynamoDBClient(),
+                    tableName(),
+                    workerIdentifier(),
+                    executorService(),
+                    failoverTimeMillis(),
+                    epsilonMillis(),
+                    maxLeasesForWorker(),
+                    maxLeasesToStealAtOneTime(),
+                    maxLeaseRenewalThreads(),
+                    cleanupLeasesUponShardCompletion(),
+                    ignoreUnexpectedChildShards(),
+                    shardSyncIntervalMillis(),
+                    consistentReads(),
+                    listShardsBackoffTimeInMillis(),
+                    maxListShardsRetryAttempts(),
+                    maxCacheMissesBeforeReload(),
+                    listShardsCacheAllowedAgeInSeconds(),
+                    cacheMissWarningModulus(),
+                    initialLeaseTableReadCapacity(),
+                    initialLeaseTableWriteCapacity(),
+                    hierarchicalShardSyncer(isMultiStreamingMode),
+                    tableCreatorCallback(),
+                    dynamoDbRequestTimeout(),
+                    billingMode(),
+                    leaseSerializer,
+                    customShardDetectorProvider());
         }
         return leaseManagementFactory;
     }
@@ -381,5 +371,4 @@ public class LeaseManagementConfig {
         this.leaseManagementFactory = leaseManagementFactory;
         return this;
     }
-
 }

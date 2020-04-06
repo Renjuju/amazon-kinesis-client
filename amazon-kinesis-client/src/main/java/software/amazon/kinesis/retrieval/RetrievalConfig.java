@@ -22,9 +22,9 @@ import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-import org.apache.commons.lang3.tuple.Pair;
 import software.amazon.awssdk.services.kinesis.KinesisAsyncClient;
 import software.amazon.awssdk.utils.Either;
+import software.amazon.awssdk.utils.Pair;
 import software.amazon.kinesis.common.InitialPositionInStream;
 import software.amazon.kinesis.common.InitialPositionInStreamExtended;
 import software.amazon.kinesis.common.StreamConfig;
@@ -32,7 +32,6 @@ import software.amazon.kinesis.common.StreamIdentifier;
 import software.amazon.kinesis.processor.MultiStreamTracker;
 import software.amazon.kinesis.retrieval.fanout.FanOutConfig;
 import software.amazon.kinesis.retrieval.polling.DataFetcher;
-import software.amazon.kinesis.retrieval.polling.KinesisDataFetcher;
 
 /**
  * Used by the KCL to configure the retrieval of records from Kinesis.
@@ -69,7 +68,7 @@ public class RetrievalConfig {
      *    // pair contains the StreamIdentifier and KinesisDataFetcher used by KCL
      * </pre>
      */
-    private Function<Pair<KinesisDataFetcher, StreamIdentifier>, DataFetcher> customDataFetcherProvider;
+    private Function<Pair<StreamIdentifier, String>, DataFetcher> customDataFetcherProvider;
 
     /**
      * AppStreamTracker either for multi stream tracking or single stream

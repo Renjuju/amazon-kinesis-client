@@ -17,15 +17,14 @@ package software.amazon.kinesis.retrieval.polling;
 
 import java.time.Duration;
 import java.util.Optional;
-
 import java.util.function.Function;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
-import org.apache.commons.lang3.tuple.Pair;
 import software.amazon.awssdk.services.kinesis.KinesisAsyncClient;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsRequest;
+import software.amazon.awssdk.utils.Pair;
 import software.amazon.kinesis.common.StreamIdentifier;
 import software.amazon.kinesis.retrieval.RecordsFetcherFactory;
 import software.amazon.kinesis.retrieval.RetrievalFactory;
@@ -109,12 +108,12 @@ public class PollingConfig implements RetrievalSpecificConfig {
     @Override
     public RetrievalFactory retrievalFactory() {
         return new SynchronousBlockingRetrievalFactory(streamName(), kinesisClient(), recordsFetcherFactory,
-                maxRecords(), kinesisRequestTimeout, null);
+                maxRecords(), kinesisRequestTimeout);
     }
 
     @Override
     public RetrievalFactory retrievalFactory(
-            Function<Pair<KinesisDataFetcher, StreamIdentifier>, DataFetcher> dataFetcherProvider
+            final Function<Pair<StreamIdentifier, String>, DataFetcher> dataFetcherProvider
     ) {
         return new SynchronousBlockingRetrievalFactory(streamName(), kinesisClient(), recordsFetcherFactory,
                 maxRecords(), kinesisRequestTimeout, dataFetcherProvider);
