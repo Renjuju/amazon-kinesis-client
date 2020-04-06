@@ -24,7 +24,6 @@ import lombok.ToString;
 import lombok.experimental.Accessors;
 import software.amazon.awssdk.services.kinesis.KinesisAsyncClient;
 import software.amazon.awssdk.utils.Either;
-import software.amazon.awssdk.utils.Pair;
 import software.amazon.kinesis.common.InitialPositionInStream;
 import software.amazon.kinesis.common.InitialPositionInStreamExtended;
 import software.amazon.kinesis.common.StreamConfig;
@@ -59,16 +58,9 @@ public class RetrievalConfig {
     private final String applicationName;
 
     /**
-     * Configurable function to override the existing DataFetcher.
-     * This is for all custom DataFetchers using a KinesisDataFetcher,
-     * e.g.
-     * <pre>
-     *    Function<Pair<StreamIdentifier, KinesisDataFetcher>, DataFetcher> customShardDetectorProvider =
-     *    pair -> new CustomDataFetcher(pair.getLeft(), pair.getRight());
-     *    // pair contains the StreamIdentifier and KinesisDataFetcher used by KCL
-     * </pre>
+     * Configurable functional interface to override the existing DataFetcher.
      */
-    private Function<Pair<StreamIdentifier, String>, DataFetcher> customDataFetcherProvider;
+    private Function<DataFetcherProviderConfig, DataFetcher> customDataFetcherProvider;
 
     /**
      * AppStreamTracker either for multi stream tracking or single stream

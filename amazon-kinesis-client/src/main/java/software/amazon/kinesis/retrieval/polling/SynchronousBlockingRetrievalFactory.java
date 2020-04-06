@@ -25,6 +25,7 @@ import software.amazon.kinesis.annotations.KinesisClientInternalApi;
 import software.amazon.kinesis.common.StreamIdentifier;
 import software.amazon.kinesis.leases.ShardInfo;
 import software.amazon.kinesis.metrics.MetricsFactory;
+import software.amazon.kinesis.retrieval.DataFetcherProviderConfig;
 import software.amazon.kinesis.retrieval.GetRecordsRetrievalStrategy;
 import software.amazon.kinesis.retrieval.RecordsFetcherFactory;
 import software.amazon.kinesis.retrieval.RecordsPublisher;
@@ -48,7 +49,7 @@ public class SynchronousBlockingRetrievalFactory implements RetrievalFactory {
     private final int maxRecords;
     private final Duration kinesisRequestTimeout;
 
-    private Function<Pair<StreamIdentifier, String>, DataFetcher> dataFetcherProvider;
+    private Function<DataFetcherProviderConfig, DataFetcher> dataFetcherProvider;
 
     public SynchronousBlockingRetrievalFactory(String streamName,
                                                KinesisAsyncClient kinesisClient,
@@ -67,7 +68,7 @@ public class SynchronousBlockingRetrievalFactory implements RetrievalFactory {
                                                RecordsFetcherFactory recordsFetcherFactory,
                                                int maxRecords,
                                                Duration kinesisRequestTimeout,
-                                               Function<Pair<StreamIdentifier, String>, DataFetcher> dataFetcherProvider) {
+                                               Function<DataFetcherProviderConfig, DataFetcher> dataFetcherProvider) {
         this.streamName = streamName;
         this.kinesisClient = kinesisClient;
         this.recordsFetcherFactory = recordsFetcherFactory;
@@ -94,7 +95,7 @@ public class SynchronousBlockingRetrievalFactory implements RetrievalFactory {
                 maxRecords,
                 metricsFactory,
                 kinesisRequestTimeout) :
-                this.dataFetcherProvider.apply(Pair.of(streamIdentifier, shardInfo.shardId()));
+                this.dataFetcherProvider.apply(new DataFetcherProviderConfig(streamIdentifier, shardInfo.shardId()));
 
         return new SynchronousGetRecordsRetrievalStrategy(dataFetcher);
     }

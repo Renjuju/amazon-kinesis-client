@@ -34,7 +34,7 @@ public interface RetrievalSpecificConfig {
      *
      * @return a retrieval factory that can create an appropriate retriever with a given data fetcher
      */
-    default RetrievalFactory retrievalFactory(Function<Pair<StreamIdentifier, String>, DataFetcher> dataFetcherProvider) {
+    default RetrievalFactory retrievalFactory(Function<DataFetcherProviderConfig, DataFetcher> dataFetcherProvider) {
         throw new UnsupportedOperationException();
     }
 }

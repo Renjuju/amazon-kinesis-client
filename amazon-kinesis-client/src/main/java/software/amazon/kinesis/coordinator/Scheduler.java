@@ -415,7 +415,6 @@ public class Scheduler implements Runnable {
     /**
      * Note: This method has package level access solely for testing purposes.
      * Sync all streams method.
-     *
      * @return streams that are being synced by this worker
      */
     @VisibleForTesting
@@ -517,7 +516,6 @@ public class Scheduler implements Runnable {
      * Requests a graceful shutdown of the worker, notifying record processors, that implement
      * {@link ShutdownNotificationAware}, of the impending shutdown. This gives the record processor a final chance to
      * checkpoint.
-     * <p>
      * This will only create a single shutdown future. Additional attempts to start a graceful shutdown will return the
      * previous future.
      *
@@ -769,7 +767,6 @@ public class Scheduler implements Runnable {
 
     /**
      * NOTE: This method is internal/private to the Worker class. It has package access solely for testing.
-     * <p>
      * This method relies on ShardInfo.equals() method returning true for ShardInfo objects which may have been
      * instantiated with parentShardIds in a different order (and rest of the fields being the equal). For example
      * shardInfo1.equals(shardInfo2) should return true with shardInfo1 and shardInfo2 defined as follows. ShardInfo
