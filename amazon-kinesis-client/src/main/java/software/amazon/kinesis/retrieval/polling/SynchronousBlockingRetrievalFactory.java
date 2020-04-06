@@ -95,7 +95,10 @@ public class SynchronousBlockingRetrievalFactory implements RetrievalFactory {
                 maxRecords,
                 metricsFactory,
                 kinesisRequestTimeout) :
-                this.dataFetcherProvider.apply(new DataFetcherProviderConfig(streamIdentifier, shardInfo.shardId()));
+                this.dataFetcherProvider.apply(new DataFetcherProviderConfig(streamIdentifier,
+                        shardInfo.shardId(),
+                        metricsFactory,
+                        maxRecords));
 
         return new SynchronousGetRecordsRetrievalStrategy(dataFetcher);
     }

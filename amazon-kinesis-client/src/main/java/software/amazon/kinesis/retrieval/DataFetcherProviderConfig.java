@@ -3,6 +3,7 @@ package software.amazon.kinesis.retrieval;
 import lombok.Data;
 import lombok.NonNull;
 import software.amazon.kinesis.common.StreamIdentifier;
+import software.amazon.kinesis.metrics.MetricsFactory;
 
 
 /**
@@ -16,4 +17,10 @@ public class DataFetcherProviderConfig {
 
     @NonNull
     private String shardId;
+
+    @NonNull
+    private MetricsFactory metricsFactory;
+
+    @NonNull
+    private Integer maxRecords;
 }

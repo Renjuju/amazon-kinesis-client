@@ -24,8 +24,6 @@ import lombok.NonNull;
 import lombok.experimental.Accessors;
 import software.amazon.awssdk.services.kinesis.KinesisAsyncClient;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsRequest;
-import software.amazon.awssdk.utils.Pair;
-import software.amazon.kinesis.common.StreamIdentifier;
 import software.amazon.kinesis.retrieval.DataFetcherProviderConfig;
 import software.amazon.kinesis.retrieval.RecordsFetcherFactory;
 import software.amazon.kinesis.retrieval.RetrievalFactory;
