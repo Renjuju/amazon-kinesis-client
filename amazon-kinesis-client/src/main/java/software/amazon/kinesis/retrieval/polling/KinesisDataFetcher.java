@@ -274,13 +274,13 @@ public class KinesisDataFetcher implements DataFetcher {
     }
 
     @Override
-    public GetRecordsResponse getResponse(GetRecordsRequest request) throws ExecutionException, InterruptedException, TimeoutException {
+    public GetRecordsResponse getGetRecordsResponse(GetRecordsRequest request) throws ExecutionException, InterruptedException, TimeoutException {
         return FutureUtils.resolveOrCancelFuture(kinesisClient.getRecords(request),
                 maxFutureWait);
     }
 
     @Override
-    public GetRecordsRequest getRequest(String nextIterator)  {
+    public GetRecordsRequest getGetRecordsRequest(String nextIterator)  {
         return KinesisRequestsBuilder.getRecordsRequestBuilder().shardIterator(nextIterator)
                 .limit(maxRecords).build();
     }
@@ -295,14 +295,14 @@ public class KinesisDataFetcher implements DataFetcher {
     @Override
     public GetRecordsResponse getRecords(@NonNull final String nextIterator) {
         final AWSExceptionManager exceptionManager = createExceptionManager();
-        GetRecordsRequest request = getRequest(nextIterator);
+        GetRecordsRequest request = getGetRecordsRequest(nextIterator);
 
         final MetricsScope metricsScope = MetricsUtil.createMetricsWithOperation(metricsFactory, OPERATION);
         MetricsUtil.addShardId(metricsScope, shardId);
         boolean success = false;
         long startTime = System.currentTimeMillis();
         try {
-            final GetRecordsResponse response = getResponse(request);
+            final GetRecordsResponse response = getGetRecordsResponse(request);
             success = true;
             return response;
         } catch (ExecutionException e) {

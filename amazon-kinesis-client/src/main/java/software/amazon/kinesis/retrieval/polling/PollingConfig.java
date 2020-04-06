@@ -112,9 +112,7 @@ public class PollingConfig implements RetrievalSpecificConfig {
     }
 
     @Override
-    public RetrievalFactory retrievalFactory(
-            final Function<Pair<StreamIdentifier, String>, DataFetcher> dataFetcherProvider
-    ) {
+    public RetrievalFactory retrievalFactory(final Function<Pair<StreamIdentifier, String>, DataFetcher> dataFetcherProvider) {
         return new SynchronousBlockingRetrievalFactory(streamName(), kinesisClient(), recordsFetcherFactory,
                 maxRecords(), kinesisRequestTimeout, dataFetcherProvider);
     }

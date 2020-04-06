@@ -47,9 +47,9 @@ public interface DataFetcher {
 
     void resetIterator(String shardIterator, String sequenceNumber, InitialPositionInStreamExtended initialPositionInStream);
 
-    GetRecordsResponse getResponse(GetRecordsRequest request) throws ExecutionException, InterruptedException, TimeoutException;
+    GetRecordsResponse getGetRecordsResponse(GetRecordsRequest request) throws Exception;
 
-    GetRecordsRequest getRequest(String nextIterator);
+    GetRecordsRequest getGetRecordsRequest(String nextIterator);
 
     String getNextIterator(GetShardIteratorRequest request) throws ExecutionException, InterruptedException, TimeoutException;
 
