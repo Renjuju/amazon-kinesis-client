@@ -136,8 +136,10 @@ public class RetrievalConfig {
             }
             retrievalFactory = retrievalSpecificConfig.retrievalFactory();
         }
-        retrievalFactory = customDataFetcherProvider != null ? retrievalSpecificConfig.retrievalFactory(customDataFetcherProvider) :
-                retrievalSpecificConfig.retrievalFactory();
+
+        if (retrievalSpecificConfig != null && customDataFetcherProvider != null) {
+            return retrievalSpecificConfig.retrievalFactory(customDataFetcherProvider);
+        }
 
         return retrievalFactory;
     }
