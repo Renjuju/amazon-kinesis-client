@@ -16,8 +16,6 @@
 package software.amazon.kinesis.retrieval;
 
 import java.util.function.Function;
-import software.amazon.awssdk.utils.Pair;
-import software.amazon.kinesis.common.StreamIdentifier;
 import software.amazon.kinesis.retrieval.polling.DataFetcher;
 
 public interface RetrievalSpecificConfig {

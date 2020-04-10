@@ -14,20 +14,18 @@
  */
 package software.amazon.kinesis.retrieval.polling;
 
+import com.google.common.collect.Iterables;
+
 import java.time.Duration;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.google.common.collect.Iterables;
-
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.services.kinesis.KinesisAsyncClient;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsRequest;
@@ -46,6 +44,7 @@ import software.amazon.kinesis.metrics.MetricsLevel;
 import software.amazon.kinesis.metrics.MetricsScope;
 import software.amazon.kinesis.metrics.MetricsUtil;
 import software.amazon.kinesis.retrieval.AWSExceptionManager;
+import software.amazon.kinesis.retrieval.DataFetcherProviderConfig;
 import software.amazon.kinesis.retrieval.DataFetcherResult;
 import software.amazon.kinesis.retrieval.IteratorBuilder;
 import software.amazon.kinesis.retrieval.RetryableRetrievalException;
@@ -97,11 +96,29 @@ public class KinesisDataFetcher implements DataFetcher {
         this.streamAndShardId = streamIdentifier.serialize() + ":" + shardId;
     }
 
-    /** Note: This method has package level access for testing purposes.
+    /**
+     * Note: This method has package level access for testing purposes.
+     *
      * @return nextIterator
      */
     @Getter(AccessLevel.PACKAGE)
     private String nextIterator;
+
+    /**
+     * Constructs KinesisDataFetcher.
+     *
+     * @param kinesisClient
+     * @param kinesisDataFetcherProviderConfig
+     */
+    public KinesisDataFetcher(KinesisAsyncClient kinesisClient, DataFetcherProviderConfig kinesisDataFetcherProviderConfig) {
+        this(kinesisClient,
+                kinesisDataFetcherProviderConfig.getStreamIdentifier(),
+                kinesisDataFetcherProviderConfig.getShardId(),
+                kinesisDataFetcherProviderConfig.getMaxRecords(),
+                kinesisDataFetcherProviderConfig.getMetricsFactory(),
+                kinesisDataFetcherProviderConfig.getKinesisRequestTimeout());
+    }
+
     @Getter
     private boolean isShardEndReached;
     private boolean isInitialized;

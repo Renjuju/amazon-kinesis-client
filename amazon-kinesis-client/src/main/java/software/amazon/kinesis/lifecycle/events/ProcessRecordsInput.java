@@ -23,6 +23,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+import software.amazon.awssdk.services.kinesis.model.Record;
 import software.amazon.kinesis.processor.ShardRecordProcessor;
 import software.amazon.kinesis.processor.RecordProcessorCheckpointer;
 import software.amazon.kinesis.retrieval.KinesisClientRecord;
@@ -56,6 +57,7 @@ public class ProcessRecordsInput {
      * The records received from Kinesis. These records may have been de-aggregated if they were published by the KPL.
      */
     private List<KinesisClientRecord> records;
+
     /**
      * A checkpointer that the {@link ShardRecordProcessor} can use to checkpoint its progress.
      */

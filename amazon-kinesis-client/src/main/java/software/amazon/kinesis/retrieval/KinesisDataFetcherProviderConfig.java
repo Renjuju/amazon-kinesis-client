@@ -16,33 +16,30 @@
 package software.amazon.kinesis.retrieval;
 
 import java.time.Duration;
+import lombok.Data;
+import lombok.NonNull;
 import software.amazon.kinesis.common.StreamIdentifier;
 import software.amazon.kinesis.metrics.MetricsFactory;
 
-public interface DataFetcherProviderConfig {
 
-    /**
-    * Gets stream identifier for dataFetcher.
-    */
-    StreamIdentifier getStreamIdentifier();
+/**
+ * Configuration needed for custom data fetchers
+ */
+@Data
+public class KinesisDataFetcherProviderConfig implements DataFetcherProviderConfig {
 
-    /**
-    * Gets shard id.
-    */
-    String getShardId();
+    @NonNull
+    private StreamIdentifier streamIdentifier;
 
-    /**
-     * Gets current instance of metrics factory.
-     */
-    MetricsFactory getMetricsFactory();
+    @NonNull
+    private String shardId;
 
-    /**
-     * Gets current max records allowed to process at a given time.
-     */
-    Integer getMaxRecords();
+    @NonNull
+    private MetricsFactory metricsFactory;
 
-    /**
-     * Gets timeout for kinesis request.
-     */
-    Duration getKinesisRequestTimeout();
+    @NonNull
+    private Integer maxRecords;
+
+    @NonNull
+    private Duration kinesisRequestTimeout;
 }

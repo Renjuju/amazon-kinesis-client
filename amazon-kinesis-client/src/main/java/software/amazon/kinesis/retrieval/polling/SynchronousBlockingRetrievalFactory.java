@@ -20,12 +20,12 @@ import java.util.function.Function;
 import lombok.Data;
 import lombok.NonNull;
 import software.amazon.awssdk.services.kinesis.KinesisAsyncClient;
-import software.amazon.awssdk.utils.Pair;
 import software.amazon.kinesis.annotations.KinesisClientInternalApi;
 import software.amazon.kinesis.common.StreamIdentifier;
 import software.amazon.kinesis.leases.ShardInfo;
 import software.amazon.kinesis.metrics.MetricsFactory;
 import software.amazon.kinesis.retrieval.DataFetcherProviderConfig;
+import software.amazon.kinesis.retrieval.KinesisDataFetcherProviderConfig;
 import software.amazon.kinesis.retrieval.GetRecordsRetrievalStrategy;
 import software.amazon.kinesis.retrieval.RecordsFetcherFactory;
 import software.amazon.kinesis.retrieval.RecordsPublisher;
@@ -69,11 +69,7 @@ public class SynchronousBlockingRetrievalFactory implements RetrievalFactory {
                                                int maxRecords,
                                                Duration kinesisRequestTimeout,
                                                Function<DataFetcherProviderConfig, DataFetcher> dataFetcherProvider) {
-        this.streamName = streamName;
-        this.kinesisClient = kinesisClient;
-        this.recordsFetcherFactory = recordsFetcherFactory;
-        this.maxRecords = maxRecords;
-        this.kinesisRequestTimeout = kinesisRequestTimeout;
+        this(streamName, kinesisClient, recordsFetcherFactory, maxRecords, kinesisRequestTimeout);
         this.dataFetcherProvider = dataFetcherProvider;
     }
 
@@ -89,16 +85,15 @@ public class SynchronousBlockingRetrievalFactory implements RetrievalFactory {
                 StreamIdentifier.multiStreamInstance(shardInfo.streamIdentifierSerOpt().get()) :
                 StreamIdentifier.singleStreamInstance(streamName);
 
-        final DataFetcher dataFetcher = this.dataFetcherProvider == null ? new KinesisDataFetcher(kinesisClient,
-                streamIdentifier,
+        final DataFetcherProviderConfig kinesisDataFetcherProviderConfig = new KinesisDataFetcherProviderConfig(streamIdentifier,
                 shardInfo.shardId(),
-                maxRecords,
                 metricsFactory,
-                kinesisRequestTimeout) :
-                this.dataFetcherProvider.apply(new DataFetcherProviderConfig(streamIdentifier,
-                        shardInfo.shardId(),
-                        metricsFactory,
-                        maxRecords));
+                maxRecords,
+                kinesisRequestTimeout);
+
+        final DataFetcher dataFetcher = this.dataFetcherProvider == null ? new KinesisDataFetcher(kinesisClient,
+                kinesisDataFetcherProviderConfig) :
+                this.dataFetcherProvider.apply(kinesisDataFetcherProviderConfig);
 
         return new SynchronousGetRecordsRetrievalStrategy(dataFetcher);
     }

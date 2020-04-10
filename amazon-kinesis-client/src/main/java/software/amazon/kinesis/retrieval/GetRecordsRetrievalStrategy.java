@@ -56,10 +56,20 @@ public interface GetRecordsRetrievalStrategy {
     @Deprecated
     KinesisDataFetcher getDataFetcher();
 
+    /**
+     * Returns a DataFetcher override if applicable, else empty for retrieving records from Kinesis.
+     *
+     * @return Optional<DataFetcher>
+     */
     default Optional<DataFetcher> getDataFetcherOverride() {
         return Optional.empty();
     }
 
+    /**
+     * Returns a dataFetcher by first checking for an override if it exists, else using the default data fetcher.
+     *
+     * @return DataFetcher
+     */
     default DataFetcher dataFetcher() {
         return getDataFetcherOverride().orElse(getDataFetcher());
     }

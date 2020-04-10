@@ -60,6 +60,6 @@ public class SynchronousGetRecordsRetrievalStrategy implements GetRecordsRetriev
     @Override
     public KinesisDataFetcher getDataFetcher() {
         // returns null as dataFetcher() will now return the current dataFetcher
-        return null;
+        throw new UnsupportedOperationException();
     }
 }
