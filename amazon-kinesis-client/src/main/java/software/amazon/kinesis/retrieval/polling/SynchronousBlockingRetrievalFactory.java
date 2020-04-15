@@ -51,6 +51,7 @@ public class SynchronousBlockingRetrievalFactory implements RetrievalFactory {
 
     private Function<DataFetcherProviderConfig, DataFetcher> dataFetcherProvider;
 
+    @Deprecated
     public SynchronousBlockingRetrievalFactory(String streamName,
                                                KinesisAsyncClient kinesisClient,
                                                RecordsFetcherFactory recordsFetcherFactory,

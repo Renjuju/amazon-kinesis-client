@@ -52,4 +52,14 @@ public class SynchronousGetRecordsRetrievalStrategy implements GetRecordsRetriev
     public KinesisDataFetcher getDataFetcher() {
         throw new UnsupportedOperationException("Deprecated. Use dataFetcher() to retrieve a dataFetcher");
     }
+
+    @Override
+    public Optional<DataFetcher> getDataFetcherOverride() {
+        return Optional.of(dataFetcher);
+    }
+
+    @Override
+    public DataFetcher dataFetcher() {
+        return dataFetcher;
+    }
 }
