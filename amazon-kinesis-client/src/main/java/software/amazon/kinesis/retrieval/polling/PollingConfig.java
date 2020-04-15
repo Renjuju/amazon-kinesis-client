@@ -37,12 +37,22 @@ public class PollingConfig implements RetrievalSpecificConfig {
     public static final Duration DEFAULT_REQUEST_TIMEOUT = Duration.ofSeconds(30);
 
     /**
+     * Configurable functional interface to override the existing DataFetcher.
+     */
+    Function<DataFetcherProviderConfig, DataFetcher> dataFetcherProvider;
+    /**
      * Name of the Kinesis stream.
      *
      * @return String
      */
-    @NonNull
-    private final String streamName;
+    private String streamName;
+
+    /**
+     * @param kinesisClient Client used to access Kinesis services.
+     */
+    public PollingConfig(KinesisAsyncClient kinesisClient) {
+        this.kinesisClient = kinesisClient;
+    }
 
     /**
      * Client used to access to Kinesis service.
@@ -60,6 +70,15 @@ public class PollingConfig implements RetrievalSpecificConfig {
      * </p>
      */
     private int maxRecords = 10000;
+
+    /**
+     * @param streamName    Name of Kinesis stream.
+     * @param kinesisClient Client used to access Kinesis serivces.
+     */
+    public PollingConfig(String streamName, KinesisAsyncClient kinesisClient) {
+        this.kinesisClient = kinesisClient;
+        this.streamName = streamName;
+    }
 
     /**
      * The value for how long the ShardConsumer should sleep if no records are returned from the call to
@@ -103,15 +122,8 @@ public class PollingConfig implements RetrievalSpecificConfig {
      */
     private Duration kinesisRequestTimeout = DEFAULT_REQUEST_TIMEOUT;
 
-
     @Override
     public RetrievalFactory retrievalFactory() {
-        return new SynchronousBlockingRetrievalFactory(streamName(), kinesisClient(), recordsFetcherFactory,
-                maxRecords(), kinesisRequestTimeout);
-    }
-
-    @Override
-    public RetrievalFactory retrievalFactory(final Function<DataFetcherProviderConfig, DataFetcher> dataFetcherProvider) {
         return new SynchronousBlockingRetrievalFactory(streamName(), kinesisClient(), recordsFetcherFactory,
                 maxRecords(), kinesisRequestTimeout, dataFetcherProvider);
     }

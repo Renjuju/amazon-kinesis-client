@@ -15,7 +15,6 @@
 
 package software.amazon.kinesis.retrieval;
 
-import java.util.function.Function;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
@@ -30,7 +29,7 @@ import software.amazon.kinesis.common.StreamConfig;
 import software.amazon.kinesis.common.StreamIdentifier;
 import software.amazon.kinesis.processor.MultiStreamTracker;
 import software.amazon.kinesis.retrieval.fanout.FanOutConfig;
-import software.amazon.kinesis.retrieval.polling.DataFetcher;
+import software.amazon.kinesis.retrieval.polling.PollingConfig;
 
 /**
  * Used by the KCL to configure the retrieval of records from Kinesis.
@@ -57,10 +56,6 @@ public class RetrievalConfig {
     @NonNull
     private final String applicationName;
 
-    /**
-     * Configurable functional interface to override the existing DataFetcher.
-     */
-    private Function<DataFetcherProviderConfig, DataFetcher> customDataFetcherProvider;
 
     /**
      * AppStreamTracker either for multi stream tracking or single stream
@@ -134,13 +129,22 @@ public class RetrievalConfig {
                 retrievalSpecificConfig = appStreamTracker.map(multiStreamTracker -> retrievalSpecificConfig,
                         streamConfig -> ((FanOutConfig) retrievalSpecificConfig).streamName(streamConfig.streamIdentifier().streamName()));
             }
-            if (customDataFetcherProvider != null) {
-                retrievalFactory = retrievalSpecificConfig.retrievalFactory(customDataFetcherProvider);
-            } else {
-                retrievalFactory = retrievalSpecificConfig.retrievalFactory();
-            }
-        }
 
+            retrievalFactory = retrievalSpecificConfig.retrievalFactory();
+        }
+        validateConfig();
         return retrievalFactory;
+    }
+
+    private void validateConfig() {
+        boolean isPollingConfig = retrievalSpecificConfig instanceof PollingConfig;
+        boolean isInvalidPollingConfig = isPollingConfig && appStreamTracker.map(multiStreamTracker ->
+                        ((PollingConfig) retrievalSpecificConfig).streamName() != null,
+                streamConfig ->
+                        streamConfig.streamIdentifier() == null || streamConfig.streamIdentifier().streamName() == null);
+
+        if(isInvalidPollingConfig) {
+            throw new UnsupportedOperationException("Invalid config: multistream enabled with streamName or single stream with no streamName");
+        }
     }
 }

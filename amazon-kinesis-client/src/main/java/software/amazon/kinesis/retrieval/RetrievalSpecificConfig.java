@@ -25,14 +25,4 @@ public interface RetrievalSpecificConfig {
      * @return a retrieval factory that can create an appropriate retriever
      */
     RetrievalFactory retrievalFactory();
-
-
-    /**
-     * Creates and returns a retrieval factory for the specific configuration based on provided data fetcher
-     *
-     * @return a retrieval factory that can create an appropriate retriever with a given data fetcher
-     */
-    default RetrievalFactory retrievalFactory(Function<DataFetcherProviderConfig, DataFetcher> dataFetcherProvider) {
-        throw new UnsupportedOperationException("RetrievalFactory with custom dataFetcher not supported");
-    }
 }
