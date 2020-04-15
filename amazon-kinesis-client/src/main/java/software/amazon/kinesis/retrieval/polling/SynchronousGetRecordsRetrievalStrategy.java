@@ -54,11 +54,6 @@ public class SynchronousGetRecordsRetrievalStrategy implements GetRecordsRetriev
     }
 
     @Override
-    public Optional<DataFetcher> getDataFetcherOverride() {
-        return Optional.of(dataFetcher);
-    }
-
-    @Override
     public DataFetcher dataFetcher() {
         return dataFetcher;
     }
