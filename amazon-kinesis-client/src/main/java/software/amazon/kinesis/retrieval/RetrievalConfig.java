@@ -134,11 +134,11 @@ public class RetrievalConfig {
                 retrievalSpecificConfig = appStreamTracker.map(multiStreamTracker -> retrievalSpecificConfig,
                         streamConfig -> ((FanOutConfig) retrievalSpecificConfig).streamName(streamConfig.streamIdentifier().streamName()));
             }
-            retrievalFactory = retrievalSpecificConfig.retrievalFactory();
-        }
-
-        if (retrievalSpecificConfig != null && customDataFetcherProvider != null) {
-            return retrievalSpecificConfig.retrievalFactory(customDataFetcherProvider);
+            if (customDataFetcherProvider != null) {
+                retrievalFactory = retrievalSpecificConfig.retrievalFactory(customDataFetcherProvider);
+            } else {
+                retrievalFactory = retrievalSpecificConfig.retrievalFactory();
+            }
         }
 
         return retrievalFactory;

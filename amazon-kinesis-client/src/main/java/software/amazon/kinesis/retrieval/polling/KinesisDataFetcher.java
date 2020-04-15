@@ -47,6 +47,7 @@ import software.amazon.kinesis.retrieval.AWSExceptionManager;
 import software.amazon.kinesis.retrieval.DataFetcherProviderConfig;
 import software.amazon.kinesis.retrieval.DataFetcherResult;
 import software.amazon.kinesis.retrieval.IteratorBuilder;
+import software.amazon.kinesis.retrieval.KinesisDataFetcherProviderConfig;
 import software.amazon.kinesis.retrieval.RetryableRetrievalException;
 import software.amazon.kinesis.retrieval.kpl.ExtendedSequenceNumber;
 
@@ -74,26 +75,13 @@ public class KinesisDataFetcher implements DataFetcher {
 
     @Deprecated
     public KinesisDataFetcher(KinesisAsyncClient kinesisClient, String streamName, String shardId, int maxRecords, MetricsFactory metricsFactory) {
-        this(kinesisClient, StreamIdentifier.singleStreamInstance(streamName), shardId, maxRecords, metricsFactory, PollingConfig.DEFAULT_REQUEST_TIMEOUT);
-    }
-
-    /**
-     * Constructs KinesisDataFetcher.
-     * @param kinesisClient
-     * @param streamIdentifier
-     * @param shardId
-     * @param maxRecords
-     * @param metricsFactory
-     * @param maxFutureWait
-     */
-    public KinesisDataFetcher(KinesisAsyncClient kinesisClient, StreamIdentifier streamIdentifier, String shardId, int maxRecords, MetricsFactory metricsFactory, Duration maxFutureWait) {
-        this.kinesisClient = kinesisClient;
-        this.streamIdentifier = streamIdentifier;
-        this.shardId = shardId;
-        this.maxRecords = maxRecords;
-        this.metricsFactory = metricsFactory;
-        this.maxFutureWait = maxFutureWait;
-        this.streamAndShardId = streamIdentifier.serialize() + ":" + shardId;
+        this(kinesisClient, new KinesisDataFetcherProviderConfig(
+                StreamIdentifier.singleStreamInstance(streamName),
+                shardId,
+                metricsFactory,
+                maxRecords,
+                PollingConfig.DEFAULT_REQUEST_TIMEOUT
+        ));
     }
 
     /**
@@ -111,12 +99,13 @@ public class KinesisDataFetcher implements DataFetcher {
      * @param kinesisDataFetcherProviderConfig
      */
     public KinesisDataFetcher(KinesisAsyncClient kinesisClient, DataFetcherProviderConfig kinesisDataFetcherProviderConfig) {
-        this(kinesisClient,
-                kinesisDataFetcherProviderConfig.getStreamIdentifier(),
-                kinesisDataFetcherProviderConfig.getShardId(),
-                kinesisDataFetcherProviderConfig.getMaxRecords(),
-                kinesisDataFetcherProviderConfig.getMetricsFactory(),
-                kinesisDataFetcherProviderConfig.getKinesisRequestTimeout());
+        this.kinesisClient = kinesisClient;
+        this.maxFutureWait = kinesisDataFetcherProviderConfig.getKinesisRequestTimeout();
+        this.maxRecords = kinesisDataFetcherProviderConfig.getMaxRecords();
+        this.metricsFactory = kinesisDataFetcherProviderConfig.getMetricsFactory();
+        this.shardId = kinesisDataFetcherProviderConfig.getShardId();
+        this.streamIdentifier = kinesisDataFetcherProviderConfig.getStreamIdentifier();
+        this.streamAndShardId = streamIdentifier.serialize() + ":" + shardId;
     }
 
     @Getter

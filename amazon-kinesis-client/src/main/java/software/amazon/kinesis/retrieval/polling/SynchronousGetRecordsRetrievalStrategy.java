@@ -27,6 +27,7 @@ import software.amazon.kinesis.retrieval.GetRecordsRetrievalStrategy;
 @Data
 @KinesisClientInternalApi
 public class SynchronousGetRecordsRetrievalStrategy implements GetRecordsRetrievalStrategy {
+
     @NonNull
     private final DataFetcher dataFetcher;
 
@@ -48,18 +49,7 @@ public class SynchronousGetRecordsRetrievalStrategy implements GetRecordsRetriev
     }
 
     @Override
-    public Optional<DataFetcher> getDataFetcherOverride() {
-        return Optional.of(dataFetcher);
-    }
-
-    @Override
-    public DataFetcher dataFetcher() {
-        return dataFetcher;
-    }
-
-    @Override
     public KinesisDataFetcher getDataFetcher() {
-        // returns null as dataFetcher() will now return the current dataFetcher
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Deprecated. Use dataFetcher() to retrieve a dataFetcher");
     }
 }

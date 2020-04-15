@@ -33,6 +33,6 @@ public interface RetrievalSpecificConfig {
      * @return a retrieval factory that can create an appropriate retriever with a given data fetcher
      */
     default RetrievalFactory retrievalFactory(Function<DataFetcherProviderConfig, DataFetcher> dataFetcherProvider) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("RetrievalFactory with custom dataFetcher not supported");
     }
 }

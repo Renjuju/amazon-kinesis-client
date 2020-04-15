@@ -317,8 +317,7 @@ public class LeaseManagementConfig {
                     initialLeaseTableReadCapacity(),
                     initialLeaseTableWriteCapacity(),
                     hierarchicalShardSyncer(),
-                    tableCreatorCallback(), dynamoDbRequestTimeout(), billingMode(),
-                    customShardDetectorProvider());
+                    tableCreatorCallback(), dynamoDbRequestTimeout(), billingMode());
         }
         return leaseManagementFactory;
     }

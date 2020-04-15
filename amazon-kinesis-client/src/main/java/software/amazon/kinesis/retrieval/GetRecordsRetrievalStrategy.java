@@ -53,7 +53,6 @@ public interface GetRecordsRetrievalStrategy {
      *
      * @return DataFetcher
      */
-    @Deprecated
     KinesisDataFetcher getDataFetcher();
 
     /**
