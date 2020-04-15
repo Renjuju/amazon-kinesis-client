@@ -144,7 +144,7 @@ public class RetrievalConfig {
                         streamConfig.streamIdentifier() == null || streamConfig.streamIdentifier().streamName() == null);
 
         if(isInvalidPollingConfig) {
-            throw new UnsupportedOperationException("Invalid config: multistream enabled with streamName or single stream with no streamName");
+            throw new IllegalArgumentException("Invalid config: multistream enabled with streamName or single stream with no streamName");
         }
     }
 }

@@ -19,7 +19,6 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.function.Function;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 import software.amazon.awssdk.services.kinesis.KinesisAsyncClient;
@@ -31,7 +30,6 @@ import software.amazon.kinesis.retrieval.RetrievalSpecificConfig;
 
 @Accessors(fluent = true)
 @Data
-@Getter
 public class PollingConfig implements RetrievalSpecificConfig {
 
     public static final Duration DEFAULT_REQUEST_TIMEOUT = Duration.ofSeconds(30);
