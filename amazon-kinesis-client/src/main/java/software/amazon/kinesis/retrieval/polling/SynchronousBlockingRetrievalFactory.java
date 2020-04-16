@@ -44,8 +44,7 @@ public class SynchronousBlockingRetrievalFactory implements RetrievalFactory {
     private final KinesisAsyncClient kinesisClient;
     @NonNull
     private final RecordsFetcherFactory recordsFetcherFactory;
-    // private final long listShardsBackoffTimeInMillis;
-    // private final int maxListShardsRetryAttempts;
+
     private final int maxRecords;
     private final Duration kinesisRequestTimeout;
 
