@@ -17,7 +17,6 @@ package software.amazon.kinesis.leases.dynamodb;
 
 import java.time.Duration;
 import java.util.concurrent.ExecutorService;
-
 import java.util.function.Function;
 import lombok.Data;
 import lombok.NonNull;
@@ -528,8 +527,9 @@ public class DynamoDBLeaseManagementFactory implements LeaseManagementFactory {
      */
     @Override
     public ShardDetector createShardDetector(StreamConfig streamConfig) {
-        return new KinesisShardDetector(kinesisClient, streamConfig.streamIdentifier(), listShardsBackoffTimeMillis,
-                maxListShardsRetryAttempts, listShardsCacheAllowedAgeInSeconds, maxCacheMissesBeforeReload,
-                cacheMissWarningModulus, dynamoDbRequestTimeout);
+        return customShardDetectorProvider != null ? customShardDetectorProvider.apply(streamConfig) :
+                new KinesisShardDetector(kinesisClient, streamConfig.streamIdentifier(), listShardsBackoffTimeMillis,
+                        maxListShardsRetryAttempts, listShardsCacheAllowedAgeInSeconds, maxCacheMissesBeforeReload,
+                        cacheMissWarningModulus, dynamoDbRequestTimeout);
     }
 }
