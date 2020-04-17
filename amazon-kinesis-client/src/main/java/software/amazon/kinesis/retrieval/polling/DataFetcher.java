@@ -78,40 +78,47 @@ public interface DataFetcher {
     void resetIterator(String shardIterator, String sequenceNumber, InitialPositionInStreamExtended initialPositionInStream);
 
     /**
-     * Retrieves the response based on the request
+     * Retrieves the response based on the request.
      *
      * @param request the current get records request used to receive a response.
+     * @return GetRecordsResponse response for getRecords
      */
     GetRecordsResponse getGetRecordsResponse(GetRecordsRequest request) throws Exception;
 
     /**
-     * Retrieves the next get records request based on the current iterator
+     * Retrieves the next get records request based on the current iterator.
      *
      * @param nextIterator specify the iterator to get the next record request
+     * @return {@link GetRecordsRequest}
      */
     GetRecordsRequest getGetRecordsRequest(String nextIterator);
 
     /**
-     * Gets the next iterator based on the request
+     * Gets the next iterator based on the request.
      *
      * @param request used to obtain the next shard iterator
+     * @return next iterator string
      */
     String getNextIterator(GetShardIteratorRequest request) throws ExecutionException, InterruptedException, TimeoutException;
 
     /**
-     * Gets the next set of records based on the iterator
+     * Gets the next set of records based on the iterator.
      *
      * @param nextIterator specified shard iterator for getting the next set of records
+     * @return {@link GetRecordsResponse}
      */
     GetRecordsResponse getRecords(@NonNull String nextIterator);
 
     /**
-     * Get the current account and stream information
+     * Get the current account and stream information.
+     *
+     * @return {@link StreamIdentifier}
      */
     StreamIdentifier getStreamIdentifier();
 
     /**
-     * Gets current state of shardEndReached
+     * Checks if shardEnd is reached.
+     * @return boolean to determine whether shard end is reached
      */
     boolean isShardEndReached();
 }
