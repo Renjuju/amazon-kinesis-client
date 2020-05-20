@@ -52,6 +52,7 @@ public class MetricsCollectingTaskDecorator implements ConsumerTask {
         try {
             result = other.call();
         } finally {
+            MetricsUtil.addLatency(scope, other.getClass().getSimpleName(), startTimeMillis, MetricsLevel.SUMMARY);
             MetricsUtil.addSuccessAndLatency(scope, result != null && result.getException() == null, startTimeMillis,
                     MetricsLevel.SUMMARY);
             MetricsUtil.endScope(scope);
