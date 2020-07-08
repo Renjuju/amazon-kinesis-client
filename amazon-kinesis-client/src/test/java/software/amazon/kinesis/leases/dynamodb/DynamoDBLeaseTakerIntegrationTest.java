@@ -91,12 +91,11 @@ public class DynamoDBLeaseTakerIntegrationTest extends LeaseIntegrationTest {
     }
 
     /**
-     * Verify that we take leases non-greedily by setting up an environment where there are 4 leases and 2 workers,
-     * only one of which holds a lease. This leaves 3 free leases, but LeaseTaker should decide it needs 2 leases and
-     * only take 2.
+     * Verify that we take leases very old leases by setting up an environment where there are 4 leases and 2 workers.
+     * Since there are 3 very old leases, we will take all 3.
      */
     @Test
-    public void testNonGreedyTake() throws LeasingException {
+    public void testVeryOldLeasesTake() throws LeasingException {
         TestHarnessBuilder builder = new TestHarnessBuilder(leaseRefresher);
 
         for (int i = 0; i < 3; i++) {
@@ -105,7 +104,7 @@ public class DynamoDBLeaseTakerIntegrationTest extends LeaseIntegrationTest {
 
         builder.withLease("4", "bar").build();
 
-        builder.takeMutateAssert(taker, 2);
+        builder.takeMutateAssert(taker, 3);
     }
 
     /**
