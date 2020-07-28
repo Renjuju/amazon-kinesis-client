@@ -197,6 +197,7 @@ public class DynamoDBLeaseSerializer implements LeaseSerializer {
         Map<String, ExpectedAttributeValue> result = new HashMap<>();
 
         ExpectedAttributeValue expectedAV = ExpectedAttributeValue.builder()
+                .exists(true)
                 .value(DynamoUtils.createAttributeValue(leaseKey))
                 .build();
         result.put(LEASE_KEY_KEY, expectedAV);
