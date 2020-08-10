@@ -19,18 +19,19 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
-
-import software.amazon.kinesis.common.InitialPositionInStreamExtended;
-
 import lombok.Data;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import software.amazon.kinesis.common.InitialPositionInStreamExtended;
 import software.amazon.kinesis.coordinator.ExecutorStateEvent;
 import software.amazon.kinesis.lifecycle.ConsumerTask;
 import software.amazon.kinesis.lifecycle.TaskResult;
-import software.amazon.kinesis.metrics.MetricsFactory;
 import software.amazon.kinesis.metrics.MetricsCollectingTaskDecorator;
+import software.amazon.kinesis.metrics.MetricsFactory;
+import software.amazon.kinesis.metrics.MetricsLevel;
+import software.amazon.kinesis.metrics.MetricsScope;
+import software.amazon.kinesis.metrics.MetricsUtil;
 
 /**
  * The ShardSyncTaskManager is used to track the task to sync shards with leases (create leases for new
@@ -57,6 +58,7 @@ public class ShardSyncTaskManager {
     private final HierarchicalShardSyncer hierarchicalShardSyncer;
     @NonNull
     private final MetricsFactory metricsFactory;
+    private final MetricsScope metricsScope;
     private ConsumerTask currentTask;
     private CompletableFuture<TaskResult> future;
     private AtomicBoolean shardSyncRequestPending;
@@ -91,6 +93,7 @@ public class ShardSyncTaskManager {
         this.executorService = executorService;
         this.hierarchicalShardSyncer = new HierarchicalShardSyncer();
         this.metricsFactory = metricsFactory;
+        this.metricsScope = metricsFactory.createMetrics();
         this.shardSyncRequestPending = new AtomicBoolean(false);
         this.lock = new ReentrantLock();
     }
@@ -196,9 +199,10 @@ public class ShardSyncTaskManager {
         } else {
             if (log.isDebugEnabled()) {
                 log.debug("Previous {} task still pending.  Not submitting new task. "
-                          + "Enqueued a request that will be executed when the current request completes.", currentTask.taskType());
+                        + "Enqueued a request that will be executed when the current request completes.", currentTask.taskType());
             }
-            shardSyncRequestPending.compareAndSet(false /*expected*/, true /*update*/);
+            MetricsUtil.addCount(metricsScope, "PendingShardSyncRequest", 1, MetricsLevel.SUMMARY);
+            shardSyncRequestPending.compareAndSet(false, true);
         }
         return submittedNewTask;
     }
